@@ -45,34 +45,30 @@
     </div><!--/.container-fluid -->
 </nav>
 <div class="container">
-    <div class="col-xs-3">
-        <div>
-            <form>
-                <label for="depart" class="col-xs-12 btn btn-primary">DEPART</label>
-                <input id="depart" class="col-xs-12" type="text">
+        <form class="col-xs-12  col-sm-3">
+            <label for="depart" class="col-xs-12 btn btn-primary">DEPART</label>
+            <input id="depart" class="col-xs-12" type="text">
 
-                <label for="arriver" class="col-xs-12 btn btn-primary">arriver</label>
-                <input id="arriver" class="col-xs-12" type="text">
+            <label for="arriver" class="col-xs-12 btn btn-primary">arriver</label>
+            <input id="arriver" class="col-xs-12" type="text">
 
-                <input id="submit" value="Valide" class="col-xs-12" type="button" onclick="tracer()">
-
-            </form>
-        </div>
-
-    </div>
-    <div id="map" class=" col-xs-8" onload="initMap()"></div>
-
-    <script src="javaS/gmap.js" type="text/javascript"></script>
-    <script async defer
-            src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCP5iO9rQP3hvuce_mNNw9lJN2_G7dilUo&callback=initMap&callback=initMap"></script>
-    <script src="boostrap/jquery-3.1.1.min.js" type="text/javascript"></script>
-    <script src="boostrap/js/bootstrap.js" type="text/javascript"></script>
+            <input id="submit" value="Valide" class="col-xs-12" type="button" onclick="tracer()">
+        </form>
+    <div id="map" class="col-xs-12 col-sm-8" onload="initMap()"></div>
+</div>
+<div class="container-fluid">
+    <div id="total" class=" col-xs-12"></div>
+    <div id="right-panel" class=" col-xs-12"></div>
 </div>
 <footer class="footer">
     <div class="container">
         <p class="text-center paraFooter">Comme vous le savez il y a que DOSTREL pour vous faire un truc comme Sa</p>
     </div>
 </footer>
-
+<script src="javaS/gmap.js" type="text/javascript"></script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCP5iO9rQP3hvuce_mNNw9lJN2_G7dilUo&callback=initMap&callback=initMap"></script>
+<script src="boostrap/jquery-3.1.1.min.js" type="text/javascript"></script>
+<script src="boostrap/js/bootstrap.js" type="text/javascript"></script>
 </body>
 </html>

@@ -6,6 +6,7 @@ var infoWindow;
 var depart;
 var arriver;
 var pos;
+var marker;
 function initMap()
 {
     var myLatLng = {lat: 48.866667, lng: 2.333333};
@@ -15,7 +16,7 @@ function initMap()
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         fullscreenControl: true
     });
-    var marker = new google.maps.Marker({
+     marker = new google.maps.Marker({
         position: myLatLng,
         map: map,
         title: 'Drag me!',
@@ -68,21 +69,43 @@ function tracer()
     depart = document.getElementById("depart").value;
     arriver = document.getElementById("arriver").value;
     var directionsDisplay = new google.maps.DirectionsRenderer({
-        map: map
+        draggable: true,
+        map: map,
+        panel: document.getElementById('right-panel')
+    });
+    directionsDisplay.addListener('directions_changed', function()
+    {
+        computeTotalDistance(directionsDisplay.getDirections());
     });
     var request = {
         destination: arriver,
         origin:depart,
+        waypoints: [{location: 'paris, fr'}, {location: 'paris , fr'}],
         travelMode: 'DRIVING',
-
+        avoidTolls: true
     };
-
     var directionsService = new google.maps.DirectionsService();
     directionsService.route(request, function(response, status)
     {
-        if (status == 'OK')
+        if (status === google.maps.DirectionsStatus.OK)
         {
             directionsDisplay.setDirections(response);
         }
+        else
+        {
+            alert('Could not display directions due to: ' + status);
+        }
     });
+}
+
+function computeTotalDistance(result)
+{
+    var total = 0;
+    var myroute = result.routes[0];
+    for (var i = 0; i < myroute.legs.length; i++)
+    {
+        total += myroute.legs[i].distance.value;
+    }
+    total = total / 1000;
+    document.getElementById('total').innerHTML = total + ' km';
 }
