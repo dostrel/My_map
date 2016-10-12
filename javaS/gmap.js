@@ -7,9 +7,17 @@ var depart;
 var arriver;
 var pos;
 var marker;
+var directionsDisplay;
+var request;
+var myLatLng;
+var directionsService;
+var calculateAndDisplayRoute;
+var selectedMode;
+var origin_autocomplete;
+var destination_autocomplete;
 function initMap()
 {
-    var myLatLng = {lat: 48.866667, lng: 2.333333};
+    myLatLng = {lat: 48.866667, lng: 2.333333};
     map = new google.maps.Map(document.getElementById('map'), {
         center: myLatLng,
         zoom: 8,
@@ -23,7 +31,7 @@ function initMap()
         draggable: true,
         animation: google.maps.Animation.DROP
     });
-   // setPosition(marker);
+
     marker.addListener('click', toggleBounce);
     function toggleBounce()
     {
@@ -36,8 +44,34 @@ function initMap()
             marker.setAnimation(google.maps.Animation.BOUNCE);
         }
     }
-    geolocalisation();
+    mark = marker(myLatLng);
+    function eventMarker()
+    {
+        setPosition(mark);
+    }
+    google.maps.event.addListener(mark,'dragend', eventMarker);
+    adress();
+    var buttonMode = document.getElementById('floating-panel');
+    map.controls[google.maps.ControlPosition.TOP_CENTER].push(buttonMode);
 
+
+    directionsService = new google.maps.DirectionsService();
+    geolocalisation();
+    selectedMode = $('#mode').val();
+    autoComplet();
+
+}
+
+function autoComplet()
+{
+
+    depart = document.getElementById("depart");
+    arriver = document.getElementById("arriver");
+    origin_autocomplete = new google.maps.places.Autocomplete(depart);
+    origin_autocomplete.bindTo('bounds', map);
+
+    destination_autocomplete = new google.maps.places.Autocomplete(arriver);
+    destination_autocomplete.bindTo('bounds', map);
 }
 
 function geolocalisation()
@@ -50,8 +84,11 @@ function geolocalisation()
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
             };
+            {
+                document.getElementById("depart").value = pos.lat + ',' + pos.lng;
+            }
             infoWindow.setPosition(pos);
-            infoWindow.setContent('Location found.');
+            infoWindow.setContent('VOUS ETE ICI');
             map.setCenter(pos);
         }, function() 
         {
@@ -62,29 +99,34 @@ function geolocalisation()
     {
         handleLocationError(false, infoWindow, map.getCenter());
     }
+
 }
 
 function tracer()
 {
     depart = document.getElementById("depart").value;
     arriver = document.getElementById("arriver").value;
-    var directionsDisplay = new google.maps.DirectionsRenderer({
+    selectedMode = document.getElementById('mode').value;
+    directionsDisplay = new google.maps.DirectionsRenderer({
         draggable: true,
         map: map,
         panel: document.getElementById('right-panel')
     });
+
     directionsDisplay.addListener('directions_changed', function()
     {
         computeTotalDistance(directionsDisplay.getDirections());
     });
-    var request = {
+
+     request = {
         destination: arriver,
         origin:depart,
         waypoints: [{location: 'paris, fr'}, {location: 'paris , fr'}],
-        travelMode: 'DRIVING',
+       // travelMode: 'DRIVING',
+        travelMode: google.maps.TravelMode[selectedMode],
         avoidTolls: true
     };
-    var directionsService = new google.maps.DirectionsService();
+
     directionsService.route(request, function(response, status)
     {
         if (status === google.maps.DirectionsStatus.OK)
@@ -98,6 +140,47 @@ function tracer()
     });
 }
 
+
+function changeMode()
+{
+    var dest = $('#arriver').val();
+    var orig = $('#depart').val();
+
+    selectedMode = $('#mode').val();
+
+    if (!dest || !orig){
+        return;
+    }
+    request = {
+        destination: dest,
+        origin:orig,
+        waypoints: [{location: 'paris, fr'}, {location: 'paris , fr'}],
+        // travelMode: 'DRIVING',
+        travelMode: google.maps.TravelMode[selectedMode],
+        avoidTolls: true
+    };
+
+    directionsService.route(request, function(response, status)
+    {
+        if (status === google.maps.DirectionsStatus.OK)
+        {
+            directionsDisplay.setDirections(response);
+        }
+        else
+        {
+            alert('Could not display directions due to: ' + status);
+        }
+    });
+}
+
+function setPosition(marker)
+{
+    pos = marker.getPosition();
+    $('#latitude').val(pos.lat);
+    $('#longitude').val(pos.lng);
+}
+
+
 function computeTotalDistance(result)
 {
     var total = 0;
@@ -109,3 +192,5 @@ function computeTotalDistance(result)
     total = total / 1000;
     document.getElementById('total').innerHTML = total + ' km';
 }
+
+

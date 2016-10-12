@@ -13,9 +13,9 @@ function initMap()
      mark = marker(myLatLng);
 
     function eventMarker()
-    {
-        setPosition(mark);
-    }
+{
+    setPosition(mark);
+}
     google.maps.event.addListener(mark,'dragend', eventMarker);
     adress();
 }
