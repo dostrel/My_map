@@ -15,6 +15,9 @@ var calculateAndDisplayRoute;
 var selectedMode;
 var origin_autocomplete;
 var destination_autocomplete;
+var poss;
+var labels;
+var labelIndex;
 function initMap()
 {
     myLatLng = {lat: 48.866667, lng: 2.333333};
@@ -44,24 +47,35 @@ function initMap()
             marker.setAnimation(google.maps.Animation.BOUNCE);
         }
     }
-    mark = marker(myLatLng);
-    function eventMarker()
-    {
-        setPosition(mark);
-    }
-    google.maps.event.addListener(mark,'dragend', eventMarker);
-    adress();
+    labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    labelIndex = 0;
     var buttonMode = document.getElementById('floating-panel');
     map.controls[google.maps.ControlPosition.TOP_CENTER].push(buttonMode);
 
 
     directionsService = new google.maps.DirectionsService();
-    geolocalisation();
     selectedMode = $('#mode').val();
+    geolocalisation();
     autoComplet();
+    setPosition();
+    google.maps.event.addListener(marker,'dragend', setPosition);
+    google.maps.event.addListener(map, 'click', function(event) {
+        addMarker(event.latLng, map);
+    });
+   
 
 }
 
+function addMarker(myLatLng, map) {
+    // Add the marker at the clicked location, and add the next-available label
+    // from the array of alphabetical characters.
+     marker = new google.maps.Marker({
+        position: myLatLng,
+        label: labels[labelIndex++ % labels.length],
+        map: map
+    });
+
+}
 function autoComplet()
 {
 
@@ -78,7 +92,7 @@ function geolocalisation()
 {
     infoWindow = new google.maps.InfoWindow({map: map});
     if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) 
+        navigator.geolocation.getCurrentPosition(function(position)
         {
             pos = {
                 lat: position.coords.latitude,
@@ -90,12 +104,12 @@ function geolocalisation()
             infoWindow.setPosition(pos);
             infoWindow.setContent('VOUS ETE ICI');
             map.setCenter(pos);
-        }, function() 
+        }, function()
         {
             handleLocationError(true, infoWindow, map.getCenter());
         });
-    } 
-    else 
+    }
+    else
     {
         handleLocationError(false, infoWindow, map.getCenter());
     }
@@ -173,11 +187,11 @@ function changeMode()
     });
 }
 
-function setPosition(marker)
+function setPosition()
 {
-    pos = marker.getPosition();
-    $('#latitude').val(pos.lat);
-    $('#longitude').val(pos.lng);
+    poss = marker.getPosition();
+    $('#latitude').val(poss.lat);
+    $('#longitude').val(poss.lng);
 }
 
 

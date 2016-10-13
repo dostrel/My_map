@@ -45,16 +45,23 @@
     </div><!--/.container-fluid -->
 </nav>
 <div class="container">
-        <form class="col-xs-12  col-sm-3">
-            <label for="depart" class="col-xs-12 btn btn-primary">DEPART</label>
-            <input id="depart" class="col-xs-12" type="text">
+    <form class="col-xs-12  col-sm-2">
+        <label for="depart" class="col-xs-12 btn btn-primary">DEPART</label>
+        <input id="depart" class="col-xs-12" type="text">
 
-            <label for="arriver" class="col-xs-12 btn btn-primary">arriver</label>
-            <input id="arriver" class="col-xs-12" type="text">
+        <label for="arriver" class="col-xs-12 btn btn-primary">arriver</label>
+        <input id="arriver" class="col-xs-12" type="text">
 
-            <input id="submit" value="Valide" class="col-xs-12" type="button" onclick="tracer()">
-        </form>
-    <div id="map" class="col-xs-12 col-sm-8" onload="initMap()"></div>
+        <input id="submit" value="Valide" class="col-xs-12" type="button" onclick="tracer()">
+    </form>
+    <div id="map" class="col-xs-12 col-sm-12" onload="initMap()"></div>
+    <form class="col-xs-12 col-sm-12 form-group text-center">
+        <label for="latitude" class="col-xs-12 label-primary">LAT</label>
+        <input id="latitude" class="col-xs-12" type="text">
+
+        <label class="col-xs-12 col-sm-12 label-primary" for="longitude">LNG</label>
+        <input id="longitude" class="col-xs-12" type="text">
+    </form>
     <div id="floating-panel">
         <b>Mode of Travel: </b>
         <select id="mode" onchange="changeMode()">
@@ -64,13 +71,6 @@
             <option value="TRANSIT">Transit</option>
         </select>
     </div>
-    <form>
-        <label for="latitude" class="col-xs-12">LAT</label>
-        <input id="latitude"  type="text">
-
-        <label class="col-xs-12 for="longitude">LNG</label>
-        <input id="longitude"  type="text">
-    </form>
 </div>
 <div class="container-fluid">
     <div id="total" class=" col-xs-12"></div>
