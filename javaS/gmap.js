@@ -23,6 +23,7 @@ var service;
 function initMap()
 {
     myLatLng = {lat: 48.866667, lng: 2.333333};
+    
     map = new google.maps.Map(document.getElementById('map'), {
         center: myLatLng,
         zoom: 10,
@@ -30,13 +31,17 @@ function initMap()
             stylers: [{ visibility: 'simplified' }]
         }, {
             elementType: 'labels',
-            stylers: [{ visibility: 'off' }]
+            stylers: [{ visibility: 'on' }]
         }],
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
-        fullscreenControl: true
+        fullscreenControl: true,
+        mapTypeId: google.maps.MapTypeId.HYBRID
+
     });
+    
     infoWindow = new google.maps.InfoWindow();
+    
     service = new google.maps.places.PlacesService(map);
+    
     map.addListener('idle', monument);
 
 
@@ -47,9 +52,10 @@ function initMap()
         draggable: true,
         animation: google.maps.Animation.DROP
     });
-
+    
     marker.addListener('click', toggleBounce);
 
+    
     function toggleBounce()
     {
         if (marker.getAnimation() !== null)
@@ -61,75 +67,136 @@ function initMap()
             marker.setAnimation(google.maps.Animation.BOUNCE);
         }
     }
-
-
+    
     labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    
     labelIndex = 0;
+    
     var buttonMode = document.getElementById('floating-panel');
+    
     map.controls[google.maps.ControlPosition.TOP_CENTER].push(buttonMode);
-
-
+    
     directionsService = new google.maps.DirectionsService();
+    
     selectedMode = $('#mode').val();
+    
     geolocalisation();
+    
     autoComplet();
-    setPosition();
-    google.maps.event.addListener(marker,'dragend', setPosition);
+
+    setMyPosition();
+    var count = 0;
+    google.maps.event.addListener(marker,'dragend', setMyPosition);
 
     google.maps.event.addListener(map, 'click', function(event)
     {
-        addMarker(event.latLng, map);
+        if (count < 1)
+        {
+            addMarker(event.latLng, map);
+            count++;
+        }
+        google.maps.event.addListener(marker,'dragend', addMarker);
+
+        google.maps.event.addListener(map, 'click', function(event)
+        {
+            if (count < 2)
+            {
+                taddMarker(event.latLng, map);
+                count++;
+            }
+        });
+        google.maps.event.addListener(marker,'dragend', taddMarker);
+
+
     });
+
 
 }
 
+function taddMarker(myLatLng, map)
+{
+    poss = marker.getPosition();
+
+    $('#arriver').val(poss.lat);
+
+        marker = new google.maps.Marker({
+            position: myLatLng,
+            label: labels[labelIndex++ % labels.length],
+            map: map,
+            title: 'Drag me!',
+            draggable: true,
+            animation: google.maps.Animation.DROP
+        });
+}
 
 function addMarker(myLatLng, map)
 {
-     marker = new google.maps.Marker({
-        position: myLatLng,
-        label: labels[labelIndex++ % labels.length],
-        map: map,
-        title: 'Drag me!',
-        draggable: true,
-        animation: google.maps.Animation.DROP
-    });
+    poss = marker.getPosition();
+
+    if (depart)
+    {
+        $('#depart').val(poss.lat);
+        marker = new google.maps.Marker({
+            position: myLatLng,
+            label: labels[labelIndex++ % labels.length],
+            map: map,
+            title: 'Drag me!',
+            draggable: true,
+            animation: google.maps.Animation.DROP
+        });
+    }
+
 }
 
 
 function autoComplet()
 {
     depart = document.getElementById("depart");
+    
     arriver = document.getElementById("arriver");
+    
     origin_autocomplete = new google.maps.places.Autocomplete(depart);
+    
     origin_autocomplete.bindTo('bounds', map);
 
     destination_autocomplete = new google.maps.places.Autocomplete(arriver);
+    
     destination_autocomplete.bindTo('bounds', map);
 }
 
 
 function activGeolocalisation()
 {
-     document.getElementById("depart").value = pos.lat + ',' + pos.lng;
+
+        document.getElementById("depart").value = pos.lat + ',' + pos.lng;
 }
 
 
 function geolocalisation()
 {
     infoWindow = new google.maps.InfoWindow({map: map});
-    if (navigator.geolocation) {
+    
+    if (navigator.geolocation) 
+    {
         navigator.geolocation.getCurrentPosition(function(position)
         {
             pos = {
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
             };
-
-
+            marker = new google.maps.Marker({
+                position: pos,
+                map: map,
+                title: 'Drag me!',
+                draggable: true,
+                animation: google.maps.Animation.DROP
+            });
             infoWindow.setPosition(pos);
-            infoWindow.setContent('VOUS ETE ICI');
+
+           infoWindow.setContent('VOUS ETE ICI');
+
             map.setCenter(pos);
+            
         }, function()
         {
             handleLocationError(true, infoWindow, map.getCenter());
@@ -146,9 +213,13 @@ function geolocalisation()
 function tracer()
 {
     depart = document.getElementById("depart").value;
+    
     arriver = document.getElementById("arriver").value;
+    
     selectedMode = document.getElementById('mode').value;
-    directionsDisplay = new google.maps.DirectionsRenderer({
+    
+    directionsDisplay = new google.maps.DirectionsRenderer
+    ({
         draggable: true,
         map: map,
         panel: document.getElementById('right-panel')
@@ -185,6 +256,7 @@ function tracer()
 function changeMode()
 {
     var dest = $('#arriver').val();
+    
     var orig = $('#depart').val();
 
     selectedMode = $('#mode').val();
@@ -198,7 +270,6 @@ function changeMode()
         destination: dest,
         origin:orig,
         waypoints: [{location: 'paris, fr'}, {location: 'paris , fr'}],
-        // travelMode: 'DRIVING',
         travelMode: google.maps.TravelMode[selectedMode],
         avoidTolls: true
     };
@@ -217,10 +288,12 @@ function changeMode()
 }
 
 
-function setPosition()
+function setMyPosition()
 {
     poss = marker.getPosition();
+
     $('#latitude').val(poss.lat);
+
     $('#longitude').val(poss.lng);
 }
 
@@ -228,12 +301,16 @@ function setPosition()
 function computeTotalDistance(result)
 {
     var total = 0;
+    
     var myroute = result.routes[0];
+    
     for (var i = 0; i < myroute.legs.length; i++)
     {
         total += myroute.legs[i].distance.value;
     }
+    
     total = total / 1000;
+    
     document.getElementById('total').innerHTML = total + ' km';
 }
 
@@ -243,21 +320,32 @@ function monument()
     request = {
     bounds: map.getBounds(),
         types: ['museum', 'amusement_park']
-};
+    };
+
     service.radarSearch(request, callback);
+    
 }
-function callback(results, status) {
-    if (status !== google.maps.places.PlacesServiceStatus.OK) {
+
+
+function callback(results, status) 
+{
+    if (status !== google.maps.places.PlacesServiceStatus.OK) 
+    {
         console.error(status);
         return;
     }
-    for (var i = 0, result; result = results[i]; i++) {
+    
+    for (var i = 0, result; result = results[i]; i++) 
+    {
         addMarkerMonument(result);
     }
 }
 
-function addMarkerMonument(place) {
-    marker = new google.maps.Marker({
+
+function addMarkerMonument(place) 
+{
+    marker = new google.maps.Marker
+    ({
         map: map,
         position: place.geometry.location,
         icon: {
@@ -266,13 +354,18 @@ function addMarkerMonument(place) {
             scaledSize: new google.maps.Size(15, 17)
         }
     });
-    google.maps.event.addListener(marker, 'click', function() {
-        service.getDetails(place, function(result, status) {
-            if (status !== google.maps.places.PlacesServiceStatus.OK) {
+    
+    google.maps.event.addListener(marker, 'click', function() 
+    {
+        service.getDetails(place, function(result, status) 
+        {
+            if (status !== google.maps.places.PlacesServiceStatus.OK) 
+            {
                 console.error(status);
                 return;
             }
             infoWindow.setContent(result.name);
+            
             infoWindow.open(map, marker);
         });
     });
