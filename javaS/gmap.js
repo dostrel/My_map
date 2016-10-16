@@ -11,23 +11,36 @@ var directionsDisplay;
 var request;
 var myLatLng;
 var directionsService;
-var calculateAndDisplayRoute;
 var selectedMode;
 var origin_autocomplete;
 var destination_autocomplete;
 var poss;
 var labels;
 var labelIndex;
+var service;
+
+
 function initMap()
 {
     myLatLng = {lat: 48.866667, lng: 2.333333};
     map = new google.maps.Map(document.getElementById('map'), {
         center: myLatLng,
-        zoom: 8,
+        zoom: 10,
+        styles: [{
+            stylers: [{ visibility: 'simplified' }]
+        }, {
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+        }],
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         fullscreenControl: true
     });
-     marker = new google.maps.Marker({
+    infoWindow = new google.maps.InfoWindow();
+    service = new google.maps.places.PlacesService(map);
+    map.addListener('idle', monument);
+
+
+    marker = new google.maps.Marker({
         position: myLatLng,
         map: map,
         title: 'Drag me!',
@@ -36,6 +49,7 @@ function initMap()
     });
 
     marker.addListener('click', toggleBounce);
+
     function toggleBounce()
     {
         if (marker.getAnimation() !== null)
@@ -47,6 +61,8 @@ function initMap()
             marker.setAnimation(google.maps.Animation.BOUNCE);
         }
     }
+
+
     labels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     labelIndex = 0;
     var buttonMode = document.getElementById('floating-panel');
@@ -59,26 +75,30 @@ function initMap()
     autoComplet();
     setPosition();
     google.maps.event.addListener(marker,'dragend', setPosition);
-    google.maps.event.addListener(map, 'click', function(event) {
+
+    google.maps.event.addListener(map, 'click', function(event)
+    {
         addMarker(event.latLng, map);
     });
-   
 
 }
 
-function addMarker(myLatLng, map) {
-    // Add the marker at the clicked location, and add the next-available label
-    // from the array of alphabetical characters.
+
+function addMarker(myLatLng, map)
+{
      marker = new google.maps.Marker({
         position: myLatLng,
         label: labels[labelIndex++ % labels.length],
-        map: map
+        map: map,
+        title: 'Drag me!',
+        draggable: true,
+        animation: google.maps.Animation.DROP
     });
-
 }
+
+
 function autoComplet()
 {
-
     depart = document.getElementById("depart");
     arriver = document.getElementById("arriver");
     origin_autocomplete = new google.maps.places.Autocomplete(depart);
@@ -87,6 +107,13 @@ function autoComplet()
     destination_autocomplete = new google.maps.places.Autocomplete(arriver);
     destination_autocomplete.bindTo('bounds', map);
 }
+
+
+function activGeolocalisation()
+{
+     document.getElementById("depart").value = pos.lat + ',' + pos.lng;
+}
+
 
 function geolocalisation()
 {
@@ -98,9 +125,8 @@ function geolocalisation()
                 lat: position.coords.latitude,
                 lng: position.coords.longitude
             };
-            {
-                document.getElementById("depart").value = pos.lat + ',' + pos.lng;
-            }
+
+
             infoWindow.setPosition(pos);
             infoWindow.setContent('VOUS ETE ICI');
             map.setCenter(pos);
@@ -115,6 +141,7 @@ function geolocalisation()
     }
 
 }
+
 
 function tracer()
 {
@@ -162,9 +189,11 @@ function changeMode()
 
     selectedMode = $('#mode').val();
 
-    if (!dest || !orig){
+    if (!dest || !orig)
+    {
         return;
     }
+
     request = {
         destination: dest,
         origin:orig,
@@ -187,6 +216,7 @@ function changeMode()
     });
 }
 
+
 function setPosition()
 {
     poss = marker.getPosition();
@@ -205,6 +235,47 @@ function computeTotalDistance(result)
     }
     total = total / 1000;
     document.getElementById('total').innerHTML = total + ' km';
+}
+
+
+function monument()
+{
+    request = {
+    bounds: map.getBounds(),
+        types: ['museum', 'amusement_park']
+};
+    service.radarSearch(request, callback);
+}
+function callback(results, status) {
+    if (status !== google.maps.places.PlacesServiceStatus.OK) {
+        console.error(status);
+        return;
+    }
+    for (var i = 0, result; result = results[i]; i++) {
+        addMarkerMonument(result);
+    }
+}
+
+function addMarkerMonument(place) {
+    marker = new google.maps.Marker({
+        map: map,
+        position: place.geometry.location,
+        icon: {
+            url: 'http://maps.gstatic.com/mapfiles/circle.png',
+            anchor: new google.maps.Point(10, 10),
+            scaledSize: new google.maps.Size(15, 17)
+        }
+    });
+    google.maps.event.addListener(marker, 'click', function() {
+        service.getDetails(place, function(result, status) {
+            if (status !== google.maps.places.PlacesServiceStatus.OK) {
+                console.error(status);
+                return;
+            }
+            infoWindow.setContent(result.name);
+            infoWindow.open(map, marker);
+        });
+    });
 }
 
 

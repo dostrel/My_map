@@ -45,6 +45,7 @@
     </div><!--/.container-fluid -->
 </nav>
 <div class="container">
+
     <form class="col-xs-12  col-sm-2">
         <label for="depart" class="col-xs-12 btn btn-primary">DEPART</label>
         <input id="depart" class="col-xs-12" type="text">
@@ -54,7 +55,12 @@
 
         <input id="submit" value="Valide" class="col-xs-12" type="button" onclick="tracer()">
     </form>
-    <div id="map" class="col-xs-12 col-sm-12" onload="initMap()"></div>
+
+    <div id="map" class="col-xs-12 col-sm-7" onload="initMap()"></div>
+
+    <form class="col-sm-1">
+        <input id="geolocalisation" class="btn  btn-primary" value="geolocalisation"  type="button" onclick="activGeolocalisation()">
+    </form>
     <form class="col-xs-12 col-sm-12 form-group text-center">
         <label for="latitude" class="col-xs-12 label-primary">LAT</label>
         <input id="latitude" class="col-xs-12" type="text">
@@ -70,6 +76,9 @@
             <option value="BICYCLING">Bicycling</option>
             <option value="TRANSIT">Transit</option>
         </select>
+    </div>
+    <div class="teste">
+
     </div>
 </div>
 <div class="container-fluid">

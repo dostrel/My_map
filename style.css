@@ -2,6 +2,10 @@ html, body {
     margin: 0;
     padding: 0;
 }
+body {
+    background-image: url("http://www.gps.gov/multimedia/images/constellation.jpg");
+}
+
 #navbar {
     background: #e7e7e7;
 }
